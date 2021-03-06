@@ -8,10 +8,10 @@ go get github.com/gonejack/sendeml
 ```
 
 ### Edit mail server config
-Edit `send.json.example` into `send.json`
+Edit `smtp.json.example` into `smtp.json`
 
 ### Usage
 
 ```shell
-sendeml [-f from] [-t address] *.eml [flags]
+sendeml [-c smtp.json] [-f from] [-t address] *.eml
 ```

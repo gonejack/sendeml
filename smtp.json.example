@@ -3,8 +3,8 @@
     "to": "examplesendto@gmail.com",
     "addr": "smtp.gmail.com:587",
     "auth": {
-        "username": "exmaple@qq.com",
-        "password":"<password>",
+        "username": "exmaple@gmail.com",
+        "password":"password",
         "host": "smtp.gmail.com"
     }
 }

@@ -2,28 +2,33 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+
+	_ "embed"
+
 	"github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"os"
 )
 
 var (
-	flagVerbose = false
+	//go:embed smtp.json.example
+	smtpTPL    string
+	argFrom    *string
+	argTo      *string
+	argSMTP    *string
+	argVerbose = false
 
-	argFrom *string
-	argTo   *string
-
-	sendFile = "send.json"
-	sentDir  = "sent"
-	send     Send
+	sentDir = "sent"
+	send    Send
 
 	cmd = &cobra.Command{
 		Short: "Send eml files",
-		Use:   "sendeml [-f from] [-t address] *.eml",
+		Use:   "sendeml [-c smtp.json] [-f from] [-t address] *.eml",
 		Run: func(cmd *cobra.Command, args []string) {
-			if flagVerbose {
+			if argVerbose {
 				logrus.SetLevel(logrus.DebugLevel)
 			}
 
@@ -35,12 +40,19 @@ var (
 			}
 
 			// parse send
-			bytes, err := ioutil.ReadFile(sendFile)
-			if err == nil && len(bytes) > 0 {
+			bytes, err := ioutil.ReadFile(*argSMTP)
+			if len(bytes) > 0 {
 				err = json.Unmarshal(bytes, &send)
-				if err != nil {
-					logrus.WithError(err).Fatalf("parse %s failed", sendFile)
+			}
+			if err != nil {
+				if os.IsNotExist(err) {
+					logrus.WithError(err).Errorf("smtp config not found")
+				} else {
+					logrus.WithError(err).Errorf("parse smtp config failed")
 				}
+				logrus.Infof("please create smtp.json from this template:")
+				fmt.Println(smtpTPL)
+				return
 			}
 
 			if len(args) > 0 {
@@ -55,24 +67,30 @@ var (
 func init() {
 	cmd.Flags().SortFlags = false
 	cmd.PersistentFlags().SortFlags = false
+	argSMTP = cmd.PersistentFlags().StringP(
+		"smtp-config",
+		"c",
+		"smtp.json",
+		"smtp config file",
+	)
 	argFrom = cmd.PersistentFlags().StringP(
 		"from",
 		"f",
 		"",
-		"email from",
+		"email address from",
 	)
 	argTo = cmd.PersistentFlags().StringP(
 		"to",
 		"t",
 		"",
-		"email to",
+		"email address to",
 	)
 	cmd.PersistentFlags().BoolVarP(
-		&flagVerbose,
+		&argVerbose,
 		"verbose",
 		"v",
 		false,
-		"Verbose",
+		"verbose",
 	)
 	logrus.SetFormatter(&formatter.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05",
