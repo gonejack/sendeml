@@ -7,11 +7,17 @@ Command line tool to send eml files
 go get github.com/gonejack/sendeml
 ```
 
-### Edit mail server config
-Edit `smtp.json.example` into `smtp.json`
+### Config
+create smtp.json by
+```shell
+sendeml -p
+```
 
 ### Usage
 
 ```shell
 sendeml [-c smtp.json] [-f from] [-t address] *.eml
 ```
+
+### requirement
+- Go 1.16
