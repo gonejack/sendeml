@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Send struct {
+type sender struct {
 	From string
 	To   string
 	Addr string
@@ -22,7 +22,7 @@ type Send struct {
 	auth smtp.Auth
 }
 
-func (s *Send) sendAndMove(emails []string) {
+func (s *sender) sendAndMove(emails []string) {
 	for _, eml := range emails {
 		log := logrus.WithField("email", eml)
 
@@ -41,7 +41,7 @@ func (s *Send) sendAndMove(emails []string) {
 	}
 }
 
-func (s *Send) sendEmail(eml string) (err error) {
+func (s *sender) sendEmail(eml string) (err error) {
 	file, err := os.Open(eml)
 	if err != nil {
 		return
@@ -59,19 +59,19 @@ func (s *Send) sendEmail(eml string) (err error) {
 	return e.Send(s.Addr, s.getAuth())
 }
 
-func (s *Send) getFrom() string {
+func (s *sender) getFrom() string {
 	if *argFrom != "" {
 		return *argFrom
 	}
 	return s.From
 }
-func (s *Send) getTo() string {
+func (s *sender) getTo() string {
 	if *argTo != "" {
 		return *argTo
 	}
 	return s.To
 }
-func (s *Send) getAuth() smtp.Auth {
+func (s *sender) getAuth() smtp.Auth {
 	if s.auth == nil {
 		s.auth = smtp.PlainAuth(send.Auth.Identity, send.Auth.Username, send.Auth.Password, send.Auth.Host)
 	}

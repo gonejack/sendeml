@@ -23,10 +23,10 @@ var (
 	argTemplate = false
 
 	sentDir = "sent"
-	send    Send
+	send    sender
 
 	cmd = &cobra.Command{
-		Short: "Send eml files",
+		Short: "Command line tool to send eml files",
 		Use:   "sendeml [-c smtp.json] [-f from] [-t address] *.eml",
 		Run: func(cmd *cobra.Command, args []string) {
 			if argTemplate {
