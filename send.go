@@ -34,7 +34,7 @@ func (s *Send) sendAndMove(emails []string) {
 		}
 		log.Info("sent")
 
-		err = os.Rename(eml, filepath.Join(sentDir, eml))
+		err = os.Rename(eml, filepath.Join(sentDir, filepath.Base(eml)))
 		if err != nil {
 			log.WithError(err).Fatal("move failed")
 		}
