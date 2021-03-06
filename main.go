@@ -15,11 +15,12 @@ import (
 
 var (
 	//go:embed smtp.json.example
-	smtpTPL    string
-	argFrom    *string
-	argTo      *string
-	argSMTP    *string
-	argVerbose = false
+	smtpTPL     string
+	argFrom     *string
+	argTo       *string
+	argSMTP     *string
+	argVerbose  = false
+	argTemplate = false
 
 	sentDir = "sent"
 	send    Send
@@ -28,6 +29,11 @@ var (
 		Short: "Send eml files",
 		Use:   "sendeml [-c smtp.json] [-f from] [-t address] *.eml",
 		Run: func(cmd *cobra.Command, args []string) {
+			if argTemplate {
+				fmt.Print(smtpTPL)
+				return
+			}
+
 			if argVerbose {
 				logrus.SetLevel(logrus.DebugLevel)
 			}
@@ -46,12 +52,11 @@ var (
 			}
 			if err != nil {
 				if os.IsNotExist(err) {
-					logrus.WithError(err).Errorf("smtp config not found")
+					logrus.Errorf("smtp config %s not found", *argSMTP)
 				} else {
 					logrus.WithError(err).Errorf("parse smtp config failed")
 				}
-				logrus.Infof("please create smtp.json from this template:")
-				fmt.Println(smtpTPL)
+				logrus.Infof("please create smtp.json by using argument -p")
 				return
 			}
 
@@ -84,6 +89,13 @@ func init() {
 		"t",
 		"",
 		"email address to",
+	)
+	cmd.PersistentFlags().BoolVarP(
+		&argTemplate,
+		"print-template",
+		"p",
+		false,
+		"print smtp.json template",
 	)
 	cmd.PersistentFlags().BoolVarP(
 		&argVerbose,
