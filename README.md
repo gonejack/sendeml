@@ -8,7 +8,7 @@ go get github.com/gonejack/sendeml
 ```
 
 ### Config
-create smtp.json by
+Create `smtp.json` by
 ```shell
 sendeml -p
 ```
