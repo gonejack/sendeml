@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"net/smtp"
 	"os"
 	"path/filepath"
@@ -34,9 +36,20 @@ func (s *sender) sendAndMove(emails []string) {
 		}
 		log.Info("sent")
 
-		err = os.Rename(eml, filepath.Join(sentDir, filepath.Base(eml)))
+		rename := filepath.Join(sentDir, filepath.Base(eml))
+		index := 1
+		for {
+			_, err := os.Stat(rename)
+			if errors.Is(err, os.ErrNotExist) {
+				break
+			} else {
+				rename = fmt.Sprintf("%s#%d", rename, index)
+				index += 1
+			}
+		}
+		err = os.Rename(eml, rename)
 		if err != nil {
-			log.WithError(err).Fatal("move failed")
+			log.WithError(err).Errorf("move failed")
 		}
 	}
 }
