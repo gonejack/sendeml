@@ -4,23 +4,23 @@ Command line tool to send eml files
 
 ### Install
 ```shell
-go get github.com/gonejack/sendeml
+> go get github.com/gonejack/sendeml
 ```
 
 ### Config
 Edit `~/.sendeml/smtp.json`
 ```shell
 # new config
-sendeml -p > ~/.sendeml/smtp.json
+> sendeml -p > ~/.sendeml/smtp.json
 
 # edit
-vi ~/.sendeml/smtp.json
+> vi ~/.sendeml/smtp.json
 ```
 
 ### Usage
 
 ```shell
-sendeml [-c ~/.sendeml] [-f from] [-t address] *.eml
+> sendeml [-c ~/.sendeml] [-f from] [-t address] *.eml
 ```
 
 ### requirement
