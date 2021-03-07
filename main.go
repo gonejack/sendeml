@@ -61,6 +61,10 @@ var (
 			// parse smtp.json
 			bytes, err := ioutil.ReadFile(smtpConf)
 			if len(bytes) > 0 {
+				if string(bytes) == smtpTPL {
+					logrus.Infof("please edit %s", smtpConf)
+					return
+				}
 				err = json.Unmarshal(bytes, &send)
 			}
 			if err != nil {
