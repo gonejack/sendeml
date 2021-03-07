@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	_ "embed"
 
@@ -14,18 +16,19 @@ import (
 )
 
 var (
-	//go:embed smtp.json.example
-	smtpTPL     string
+	argConfDir  *string
 	argFrom     *string
 	argTo       *string
-	argSMTP     *string
 	argVerbose  = false
 	argTemplate = false
 
-	sentDir = "sent"
-	send    sender
+	//go:embed smtp.json.example
+	smtpTPL  string
+	smtpConf = "smtp.json"
+	sentDir  = "sent"
 
-	cmd = &cobra.Command{
+	send sender
+	cmd  = &cobra.Command{
 		Short: "Command line tool to send eml files",
 		Use:   "sendeml [-c smtp.json] [-f from] [-t address] *.eml",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -38,45 +41,64 @@ var (
 				logrus.SetLevel(logrus.DebugLevel)
 			}
 
+			logrus.Infof("config dir is %s", *argConfDir)
+			{
+				err := os.MkdirAll(*argConfDir, 0766)
+				if err != nil {
+					logrus.WithError(err).Fatalf("can not create config directory")
+					return
+				}
+				smtpConf = filepath.Join(*argConfDir, smtpConf)
+			}
+
 			// create sent dir
-			err := os.MkdirAll(sentDir, 0777)
+			err := os.MkdirAll(sentDir, 0766)
 			if err != nil {
 				logrus.WithError(err).Fatalf("can not create sent directory")
 				return
 			}
 
-			// parse send
-			bytes, err := ioutil.ReadFile(*argSMTP)
+			// parse smtp.json
+			bytes, err := ioutil.ReadFile(smtpConf)
 			if len(bytes) > 0 {
 				err = json.Unmarshal(bytes, &send)
 			}
 			if err != nil {
-				if os.IsNotExist(err) {
-					logrus.Errorf("smtp config %s not found", *argSMTP)
+				if errors.Is(err, os.ErrNotExist) {
+					logrus.Errorf("smtp.json %s not found", smtpConf)
+					_ = ioutil.WriteFile(smtpConf, []byte(smtpTPL), 0766)
+					logrus.Infof("smtp.json %s created", smtpConf)
 				} else {
-					logrus.WithError(err).Errorf("parse smtp config failed")
+					logrus.WithError(err).Errorf("parse smtp.json failed")
 				}
-				logrus.Infof("please create smtp.json by using argument -p")
+				logrus.Infof("please edit %s", smtpConf)
 				return
 			}
 
-			if len(args) > 0 {
-				send.sendAndMove(args)
-			} else {
-				_ = cmd.Help()
+			if len(args) == 0 {
+				logrus.Fatalf("no .eml files given")
 			}
+
+			send.sendAndMove(args)
 		},
 	}
 )
 
+func defaultConfigDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Join(home, ".sendeml")
+}
 func init() {
 	cmd.Flags().SortFlags = false
 	cmd.PersistentFlags().SortFlags = false
-	argSMTP = cmd.PersistentFlags().StringP(
-		"smtp-config",
+	argConfDir = cmd.PersistentFlags().StringP(
+		"config-dir",
 		"c",
-		"smtp.json",
-		"smtp config file",
+		defaultConfigDir(),
+		"config directory",
 	)
 	argFrom = cmd.PersistentFlags().StringP(
 		"from",

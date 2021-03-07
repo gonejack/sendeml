@@ -8,15 +8,19 @@ go get github.com/gonejack/sendeml
 ```
 
 ### Config
-Create `smtp.json` by
+Edit `~/.sendeml/smtp.json`
 ```shell
-sendeml -p
+# new config
+sendeml -p > ~/.sendeml/smtp.json
+
+# edit
+vi ~/.sendeml/smtp.json
 ```
 
 ### Usage
 
 ```shell
-sendeml [-c smtp.json] [-f from] [-t address] *.eml
+sendeml [-c ~/.sendeml] [-f from] [-t address] *.eml
 ```
 
 ### requirement
