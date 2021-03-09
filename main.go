@@ -106,13 +106,13 @@ func init() {
 	)
 	argFrom = cmd.PersistentFlags().StringP(
 		"from",
-		"f",
+		"",
 		"",
 		"email address from",
 	)
 	argTo = cmd.PersistentFlags().StringP(
 		"to",
-		"t",
+		"",
 		"",
 		"email address to",
 	)
