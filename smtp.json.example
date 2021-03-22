@@ -3,6 +3,6 @@
     "to": "examplesendto@gmail.com",
     "host": "smtp.gmail.com",
     "port": 587,
-	"username": "exmaple@gmail.com",
-	"password":"password"
+    "username": "exmaple@gmail.com",
+    "password":"password"
 }

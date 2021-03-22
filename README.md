@@ -20,7 +20,7 @@ Edit `~/.sendeml/smtp.json`
 ### Usage
 
 ```shell
-> sendeml [-c ~/.sendeml] [-f from] [-t address] *.eml
+> sendeml [-c ~/.sendeml/smtp.json] [-f from] [-t address] *.eml
 ```
 
 ### requirement

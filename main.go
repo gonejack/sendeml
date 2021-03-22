@@ -16,16 +16,15 @@ import (
 )
 
 var (
-	argConfDir  *string
 	argFrom     *string
 	argTo       *string
+	argSMTP     *string
 	argVerbose  = false
 	argTemplate = false
 
 	//go:embed smtp.json.example
-	smtpTPL  string
-	smtpConf = "smtp.json"
-	sentDir  = "sent"
+	smtpTPL string
+	sentDir = "sent"
 
 	send sender
 	cmd  = &cobra.Command{
@@ -41,16 +40,6 @@ var (
 				logrus.SetLevel(logrus.DebugLevel)
 			}
 
-			logrus.Infof("config dir is %s", *argConfDir)
-			{
-				err := os.MkdirAll(*argConfDir, 0766)
-				if err != nil {
-					logrus.WithError(err).Fatalf("can not create config directory")
-					return
-				}
-				smtpConf = filepath.Join(*argConfDir, smtpConf)
-			}
-
 			// create sent dir
 			err := os.MkdirAll(sentDir, 0766)
 			if err != nil {
@@ -59,6 +48,7 @@ var (
 			}
 
 			// parse smtp.json
+			smtpConf := *argSMTP
 			bytes, err := ioutil.ReadFile(smtpConf)
 			if len(bytes) > 0 {
 				if string(bytes) == smtpTPL {
@@ -98,12 +88,6 @@ func defaultConfigDir() string {
 func init() {
 	cmd.Flags().SortFlags = false
 	cmd.PersistentFlags().SortFlags = false
-	argConfDir = cmd.PersistentFlags().StringP(
-		"config-dir",
-		"c",
-		defaultConfigDir(),
-		"config directory",
-	)
 	argFrom = cmd.PersistentFlags().StringP(
 		"from",
 		"",
@@ -115,6 +99,12 @@ func init() {
 		"",
 		"",
 		"email address to",
+	)
+	argSMTP = cmd.PersistentFlags().StringP(
+		"smtp",
+		"c",
+		filepath.Join(defaultConfigDir(), "smtp.json"),
+		"smtp config",
 	)
 	cmd.PersistentFlags().BoolVarP(
 		&argTemplate,
