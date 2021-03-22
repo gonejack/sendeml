@@ -1,10 +1,8 @@
 {
     "from": "exmaple@gmail.com",
     "to": "examplesendto@gmail.com",
-    "addr": "smtp.gmail.com:587",
-    "auth": {
-        "username": "exmaple@gmail.com",
-        "password":"password",
-        "host": "smtp.gmail.com"
-    }
+    "host": "smtp.gmail.com",
+    "port": 587,
+	"username": "exmaple@gmail.com",
+	"password":"password"
 }

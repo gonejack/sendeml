@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/smtp"
@@ -12,15 +13,13 @@ import (
 )
 
 type sender struct {
-	From string
-	To   string
-	Addr string
-	Auth struct {
-		Identity string
-		Username string
-		Password string
-		Host     string
-	}
+	From     string
+	To       string
+	Host     string
+	Port     int
+	Username string
+	Password string
+
 	auth smtp.Auth
 }
 
@@ -69,7 +68,14 @@ func (s *sender) sendEmail(eml string) (err error) {
 	e.From = s.getFrom()
 	e.To = []string{s.getTo()}
 
-	return e.Send(s.Addr, s.getAuth())
+	addr := fmt.Sprintf("%s:%d", s.Host, s.Port)
+	auth := s.getAuth()
+
+	if s.Port == 465 {
+		return e.SendWithTLS(addr, auth, &tls.Config{ServerName: s.Host})
+	} else {
+		return e.Send(addr, auth)
+	}
 }
 
 func (s *sender) getFrom() string {
@@ -86,7 +92,7 @@ func (s *sender) getTo() string {
 }
 func (s *sender) getAuth() smtp.Auth {
 	if s.auth == nil {
-		s.auth = smtp.PlainAuth(send.Auth.Identity, send.Auth.Username, send.Auth.Password, send.Auth.Host)
+		s.auth = smtp.PlainAuth("", send.Username, send.Password, send.Host)
 	}
 	return s.auth
 }
