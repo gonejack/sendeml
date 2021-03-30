@@ -1,6 +1,9 @@
 # sendeml
+Command line tool to send eml files.
 
-Command line tool to send eml files
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/gonejack/sendeml)
+![Build](https://github.com/gonejack/sendeml/actions/workflows/go.yml/badge.svg)
+[![GitHub license](https://img.shields.io/github/license/gonejack/sendeml.svg?color=blue)](LICENSE)
 
 ### Install
 ```shell
