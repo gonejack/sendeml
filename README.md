@@ -25,6 +25,3 @@ Edit `~/.sendeml/smtp.json`
 ```shell
 > sendeml [-c ~/.sendeml/smtp.json] [-f from] [-t address] *.eml
 ```
-
-### requirement
-- Go 1.16
