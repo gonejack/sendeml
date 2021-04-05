@@ -32,7 +32,7 @@ Usage:
 Flags:
       --from string      email address from
       --to string        email address to
-  -c, --smtp string      smtp config (default "/Users/youi/.sendeml/smtp.json")
+  -c, --smtp string      smtp config (default "~/.sendeml/smtp.json")
   -p, --print-template   print smtp.json template
   -v, --verbose          verbose
   -h, --help             help for sendeml
