@@ -30,7 +30,7 @@ func (s *sender) sendAndMove(emails []string) {
 	for _, eml := range emails {
 		log := logrus.WithField("email", eml)
 
-		log.Infof("sending %s", eml)
+		log.Infof("sending")
 		err := s.sendEmail(eml)
 		if err != nil {
 			log.WithError(err).Errorf("send failed")
