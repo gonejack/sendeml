@@ -12,14 +12,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type sender struct {
+type config struct {
 	From     string
 	To       string
 	Host     string
 	Port     int
 	Username string
 	Password string
+}
 
+type sender struct {
+	config
 	auth smtp.Auth
 }
 
@@ -27,7 +30,7 @@ func (s *sender) sendAndMove(emails []string) {
 	for _, eml := range emails {
 		log := logrus.WithField("email", eml)
 
-		log.Debugf("sending")
+		log.Infof("sending %s", eml)
 		err := s.sendEmail(eml)
 		if err != nil {
 			log.WithError(err).Errorf("send failed")

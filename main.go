@@ -1,14 +1,14 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	_ "embed"
 
 	"github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
@@ -16,15 +16,15 @@ import (
 )
 
 var (
+	//go:embed smtp.json.example
+	smtpTPL string
+	sentDir = "sent"
+
 	argFrom     *string
 	argTo       *string
 	argSMTP     *string
 	argVerbose  = false
 	argTemplate = false
-
-	//go:embed smtp.json.example
-	smtpTPL string
-	sentDir = "sent"
 
 	send sender
 	cmd  = &cobra.Command{
@@ -40,37 +40,36 @@ var (
 				logrus.SetLevel(logrus.DebugLevel)
 			}
 
-			// create sent dir
-			err := os.MkdirAll(sentDir, 0766)
-			if err != nil {
-				logrus.WithError(err).Fatalf("can not create sent directory")
+			// parse smtp.json
+			cpath := *argSMTP
+			fd, err := os.Open(cpath)
+			if err == nil {
+				err = json.NewDecoder(fd).Decode(&send.config)
+			}
+			if errors.Is(err, fs.ErrNotExist) {
+				logrus.Errorf("%s not found", cpath)
+				_ = ioutil.WriteFile(cpath, []byte(smtpTPL), 0766)
+				logrus.Infof("%s created", cpath)
 				return
 			}
-
-			// parse smtp.json
-			smtpConf := *argSMTP
-			bytes, err := ioutil.ReadFile(smtpConf)
-			if len(bytes) > 0 {
-				if string(bytes) == smtpTPL {
-					logrus.Infof("please edit %s", smtpConf)
-					return
-				}
-				err = json.Unmarshal(bytes, &send)
-			}
 			if err != nil {
-				if errors.Is(err, os.ErrNotExist) {
-					logrus.Errorf("smtp.json %s not found", smtpConf)
-					_ = ioutil.WriteFile(smtpConf, []byte(smtpTPL), 0766)
-					logrus.Infof("smtp.json %s created", smtpConf)
-				} else {
-					logrus.WithError(err).Errorf("parse smtp.json failed")
-				}
-				logrus.Infof("please edit %s", smtpConf)
+				logrus.WithError(err).Errorf("parse %s failed", cpath)
 				return
 			}
 
 			if len(args) == 0 {
+				args, _ = filepath.Glob("*.eml")
+			}
+			if len(args) == 0 {
 				logrus.Fatalf("no .eml files given")
+				return
+			}
+
+			// create sent dir
+			err = os.MkdirAll(sentDir, 0766)
+			if err != nil {
+				logrus.WithError(err).Fatalf("can not create sent directory")
+				return
 			}
 
 			send.sendAndMove(args)
