@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -48,7 +47,7 @@ var (
 			}
 			if errors.Is(err, fs.ErrNotExist) {
 				logrus.Errorf("%s not found", cpath)
-				_ = ioutil.WriteFile(cpath, []byte(smtpTPL), 0766)
+				_ = os.WriteFile(cpath, []byte(smtpTPL), 0766)
 				logrus.Infof("%s created", cpath)
 				return
 			}
